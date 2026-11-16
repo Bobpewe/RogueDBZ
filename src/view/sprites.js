@@ -32,6 +32,42 @@
     '...bbb..bbb.....'
   ]);
 
+  def('vegeta', { K: '#16161d', s: '#f2c08c', e: '#16161d', b: '#2b3f9a', w: '#f4f4f8', y: '#e8b830' }, [
+    '.....K..K.......',
+    '....KKKKKK......',
+    '....KKKKKK......',
+    '...KKKKKKKK.....',
+    '...KKKKKKKK.....',
+    '...KKsKKsKK.....',
+    '...KssssssK.....',
+    '...sesssses.....',
+    '....ssssss......',
+    '..yywwwwwwyy....',
+    '.ybwwwwwwwwby...',
+    '.w.bwwyywwb.w...',
+    '.w.bbbbbbbb.w...',
+    '...bbb..bbb.....',
+    '...bbb..bbb.....',
+    '...www..www.....'
+  ]);
+  def('piccolo', { w: '#f4f4f8', p: '#6a3fb0', g: '#5fb04a', e: '#16161d', r: '#d03a3a', o: '#8a5a30' }, [
+    '.....wwwwww.....',
+    '....wwwppwww....',
+    '....wwwwwwww....',
+    '..g.gggggggg.g..',
+    '...ggeggggegg...',
+    '....gggggggg....',
+    '.....gggggg.....',
+    '.wwwwwppppwwwww.',
+    'wwwwwppppppwwwww',
+    '.www.pppppp.www.',
+    '.ww..prrrrp..ww.',
+    '.ww..pppppp..ww.',
+    '.w...ppp.ppp..w.',
+    '.....ppp.ppp....',
+    '.....ooo.ooo....'
+  ]);
+
   /* --- Ennemis de base (recolorés selon le biome via "swap") --- */
   // Bête à quatre pattes, vue de profil (regarde à droite)
   def('beast', { G: '#8d8f9c', D: '#5d5f6c', e: '#ff3030', w: '#ffffff', K: '#16161d' }, [

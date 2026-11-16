@@ -1,10 +1,10 @@
 # PROGRESS
 
 ## État actuel
-M4 terminé et testé (11 tests OK). Jalon en cours : **M5**.
+M5 terminé et testé (14 tests OK). Jalon en cours : **M6**.
 
 ## Prochaine action
-M5 : 4 biomes (palettes + ennemis recolorés), 3 personnages (sprites Vegeta, Piccolo), vérifier la boutique en jeu.
+M6 : bosses.js (IA de boss à phases, attaques composables), données + sprites des 4 mini-boss et 4 boss.
 
 ## Décisions prises
 - Pas de modules ES : chaque fichier est une IIFE qui remplit l'espace de noms global `DBR` (window ou globalThis sous Node).

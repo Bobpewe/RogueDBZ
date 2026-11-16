@@ -244,6 +244,39 @@ test('salles spéciales : Senzu, coffre et boutique', function () {
   return 'OK';
 });
 
+/* ---------- Biomes, personnages, boutique (M5) ---------- */
+test('contenu : 4 biomes, 3 personnages, données cohérentes', function () {
+  assert(DBR.BIOMES.length === 4, '4 biomes attendus');
+  assert(DBR.CHAR_ORDER.length === 3, '3 personnages attendus');
+  DBR.BIOMES.forEach(function (b) { b.pool.forEach(function (k) { var d = DBR.ENEMIES[k]; assert(d && DBR.AI[d.ai] && d.hp > 0 && d.cost > 0 && d.zeni, 'ennemi invalide : ' + k); if (d.minion) assert(DBR.ENEMIES[d.minion], 'sbire inconnu : ' + d.minion); }); });
+  var ais = {}; Object.keys(DBR.ENEMIES).forEach(function (k) { ais[DBR.ENEMIES[k].ai] = 1; });
+  ['melee', 'ranged', 'charger', 'summoner'].forEach(function (a) { assert(ais[a], 'comportement absent : ' + a); });
+  return Object.keys(DBR.ENEMIES).length + ' types d\'ennemis';
+});
+
+test('personnages : styles distincts et spéciaux fonctionnels', function () {
+  var out = [];
+  DBR.CHAR_ORDER.forEach(function (id) {
+    var g = DBR.createGame({ seed: 5, charId: id, noRun: true }), p = g.player;
+    var e = DBR.spawnEnemy(g, 'brute', p.x, p.y - 150, { spawnT: 0 }); e.hp = e.maxHp = 1e5; e.cd = 1e9;
+    for (var i = 0; i < 120; i++) DBR.step(g, { ax: e.x, ay: e.y, special: i === 1 });
+    assert(g.stats.dmgDealt > 0, id + ' : le spécial ne fait aucun dégât');
+    out.push(DBR.CHARS[id].name + ' ' + p.maxHp + ' PV / spécial ' + g.stats.dmgDealt);
+  });
+  var G = DBR.CHARS.goku, V = DBR.CHARS.vegeta, P = DBR.CHARS.piccolo;
+  assert(V.dmg > G.dmg && V.hp < G.hp && P.regen > 0 && P.range > G.range, 'styles non distincts');
+  return out.join(' ; ');
+});
+
+test('chaque biome : 1500 frames de combat sans exception', function () {
+  for (var b = 0; b < DBR.BIOMES.length; b++) {
+    var g = DBR.createGame({ seed: 50 + b }); g.player.hp = g.player.maxHp = 1e6;
+    DBR.enterRoom(g, b * 6 + 1);
+    for (var i = 0; i < 1500 && !g.over; i++) { if (g.phase === 'reward') botChoose(g); DBR.step(g, botInput(g)); g.events.length = 0; }
+    assert(g.stats.kills > 0, 'aucune élimination dans ' + DBR.BIOMES[b].name);
+  }
+});
+
 /* __TESTS_SUIVANTS__ */
 
 console.log('== ' + passed + ' réussi(s), ' + failed + ' échec(s) ==');

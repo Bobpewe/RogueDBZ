@@ -168,10 +168,12 @@ function botInput(g) {
   inp.dash = danger && p.dashCd <= 0 && g.frame % 2 === 0;
   return inp;
 }
-/** Choix d'amélioration de l'IA : la plus rare proposée. */
+/** Choix d'amélioration de l'IA : privilégie l'attaque comme le ferait un joueur, puis la rareté. */
+var BOT_PRIO = ['fan', 'double', 'kaioken', 'train', 'rapid', 'crit', 'zenkai', 'pierce', 'boom', 'master', 'homing', 'senzu', 'heart', 'rage', 'counter'];
+function botScore(id) { var i = BOT_PRIO.indexOf(id); return (i >= 0 ? 100 - i : 0) + DBR.UPGRADES[id].rar; }
 function botChoose(g) {
   var best = 0;
-  for (var i = 1; i < g.choice.length; i++) if (DBR.UPGRADES[g.choice[i]].rar > DBR.UPGRADES[g.choice[best]].rar) best = i;
+  for (var i = 1; i < g.choice.length; i++) if (botScore(g.choice[i]) > botScore(g.choice[best])) best = i;
   DBR.chooseUpgrade(g, best);
 }
 /** Joue un run entier avec l'IA. Retourne la partie terminée (ou interrompue à maxFrames). */
@@ -340,7 +342,58 @@ test('méta : les bonus permanents s\'appliquent, la fin de run crédite des orb
   return '+' + earned + ' orbes pour 7 salles et 2 boss';
 });
 
-/* __TESTS_SUIVANTS__ */
+/* ---------- Runs complets (M8) ---------- */
+test('run complet — DÉFAITE : un joueur inactif meurt, la mort est définitive', function () {
+  var g = playRun({ seed: 2024 }, 60 * 600, true);
+  assert(g.over && !g.won && g.phase === 'dead' && g.player.hp === 0, 'le joueur inactif aurait dû mourir : ' + fmt(g));
+  var f = g.frame, r = g.roomIndex; for (var i = 0; i < 120; i++) DBR.step(g, botInput(g));
+  assert(g.frame === f && g.roomIndex === r, 'la partie doit rester figée après la mort');
+  var d = DBR.Meta.defaults(), earned = DBR.Meta.finishRun(d, g);
+  assert(d.stats.runs === 1 && d.stats.wins === 0 && earned === g.stats.rooms + g.stats.bosses * 4, 'bilan de défaite');
+  return fmt(g) + ', +' + earned + ' orbes';
+});
+
+test('run complet — DÉFAITE au combat : l\'IA en difficulté extrême finit par tomber', function () {
+  var g = playRun({ seed: 77, difficulty: 12 }, 60 * 1800, false);
+  assert(g.over && !g.won, 'défaite attendue : ' + fmt(g));
+  assert(g.stats.kills > 0, 'l\'IA aurait dû se battre');
+  return fmt(g);
+});
+
+test('run complet — VICTOIRE : l\'IA traverse les 24 salles et bat le boss final', function () {
+  // Difficulté normale, sans aucun bonus ; on essaie quelques graines, la première victoire suffit.
+  var seeds = [101, 404, 202], g = null, tried = [];
+  for (var i = 0; i < seeds.length && !(g && g.won); i++) { g = playRun({ seed: seeds[i], charId: 'goku' }, 60 * 2400, false); tried.push(seeds[i] + (g.won ? ' gagné' : ' perdu salle ' + (g.roomIndex + 1))); }
+  assert(g.won && g.over && g.phase === 'victory', 'aucune victoire : ' + tried.join(', '));
+  assert(g.roomIndex === g.rooms.length - 1 && g.rooms[g.roomIndex].kind === 'boss', 'la victoire doit avoir lieu dans la salle du boss final');
+  assert(g.stats.bosses === 8, 'boss vaincus : ' + g.stats.bosses + ' (attendu 8 : 4 mini-boss + 3 boss + boss final)');
+  assert(g.stats.rooms === 16, 'salles de combat nettoyées : ' + g.stats.rooms);
+  assert(g.player.upgrades.length >= 15, 'trop peu d\'améliorations : ' + g.player.upgrades.length);
+  // La victoire est créditée et survit à un cycle sauvegarde / rechargement
+  var st = fakeStorage(), d = DBR.Meta.load(st), earned = DBR.Meta.finishRun(d, g);
+  assert(earned === 16 + 8 * 4 + 30, 'orbes de victoire : ' + earned);
+  DBR.Meta.save(st, d);
+  var back = DBR.Meta.load(st);
+  assert(back.stats.wins === 1 && back.orbs === earned && back.stats.bestRoom === 24 && back.stats.bestTime > 0, 'victoire non sauvegardée');
+  assert(DBR.Meta.unlockChar(back, 'vegeta') && back.unlocked.vegeta, 'une victoire doit permettre de débloquer Vegeta');
+  return tried.join(', ') + ' — ' + fmt(g) + ', ' + g.player.upgrades.length + ' améliorations, +' + earned + ' orbes';
+});
+
+test('run complet — les 3 personnages atteignent le boss final (Facile + bonus du Dojo)', function () {
+  var out = [];
+  DBR.CHAR_ORDER.forEach(function (id) {
+    var g = playRun({ seed: 303, charId: id, difficulty: 0.7, perks: { hp: 5, dmg: 5, ki: 5, zeni: 4, ultra: 5 } }, 60 * 2400, false);
+    assert(g.roomIndex === g.rooms.length - 1, DBR.CHARS[id].name + ' arrêté en ' + fmt(g));
+    out.push(DBR.CHARS[id].name + (g.won ? ' gagne en ' : ' perd au boss final en ') + (g.time / 60).toFixed(1) + ' min');
+  });
+  return out.join(', ');
+});
+
+test('run complet — reproductible : même graine, même déroulement', function () {
+  var a = playRun({ seed: 555, charId: 'piccolo' }, 60 * 240, false), b = playRun({ seed: 555, charId: 'piccolo' }, 60 * 240, false);
+  assert(snapshot(a) === snapshot(b) && a.stats.dmgDealt === b.stats.dmgDealt && a.player.upgrades.join() === b.player.upgrades.join(), 'divergence entre deux runs identiques');
+  return snapshot(a);
+});
 
 console.log('== ' + passed + ' réussi(s), ' + failed + ' échec(s) ==');
 process.exit(failed ? 1 : 0);

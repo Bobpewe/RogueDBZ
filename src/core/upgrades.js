@@ -23,7 +23,7 @@
   function up(id, rar, icon, name, desc, apply, max) { UP[id] = { id: id, rar: rar, icon: icon, name: name, desc: desc, apply: apply, max: max || 99 }; }
 
   // --- Communes ---
-  up('train', 0, 'F', 'Entraînement intensif', '+15 % de dégâts.', function (p) { p.dmg *= 1.15; });
+  up('train', 0, 'F', 'Entraînement intensif', '+15 % de dégâts.', function (p) { p.dmg *= 1.15; }, 8);
   up('weights', 0, 'V', 'Vêtements lestés retirés', '+10 % de vitesse de déplacement.', function (p) { p.speed *= 1.1; }, 5);
   up('heart', 0, '♥', 'Cœur de guerrier', '+20 PV max et soigne 20 PV.', function (p) { p.maxHp += 20; p.hp = Math.min(p.maxHp, p.hp + 20); });
   up('meditate', 0, 'K', 'Méditation', '+25 Ki max et +25 % de recharge du Ki.', function (p) { p.kiMax += 25; p.kiRegen *= 1.25; });
@@ -49,7 +49,7 @@
   up('ricochet', 2, '^', 'Ricochet', 'Les tirs rebondissent 2 fois sur les murs.', function (p) { p.bounce += 2; p.range *= 1.3; }, 2);
   up('senzu', 2, 'B', 'Senzu de secours', 'Vous ressuscite une fois avec 50 % des PV.', function (p) { p.revive += 1; }, 2);
   up('master', 2, 'M', 'Maître du Ki', 'Spécial : coût −40 %, dégâts +50 %.', function (p) { p.specialCost *= 0.6; p.specialMul *= 1.5; }, 2);
-  up('zenkai', 2, 'Z', 'Zenkai', 'Après chaque salle : +4 % de dégâts permanents et soin de 8 % des PV.', function (p) { p.zenkai += 0.04; }, 2);
+  up('zenkai', 2, 'Z', 'Zenkai', 'Après chaque salle : +3 % de dégâts permanents et soin de 8 % des PV.', function (p) { p.zenkai += 0.03; }, 1);
   up('fan', 2, '3', 'Tir en éventail', '+2 projectiles par tir (dégâts −20 %).', function (p) { p.multishot += 2; p.dmg *= 0.8; }, 2);
 
   DBR.UPGRADE_IDS = Object.keys(UP);

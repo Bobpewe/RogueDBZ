@@ -263,10 +263,11 @@
   /* ---------- Actions du joueur ---------- */
   function fire(g, p) {
     var n = p.multishot, base = DBR.playerDamage(g, p);
+    var spread = Math.min(0.13, 0.4 / Math.max(1, n - 1));   // l'éventail total reste serré, même avec beaucoup de projectiles
     for (var i = 0; i < n; i++) {
       var crit = p.crit > 0 && g.rng.chance(p.crit);
       DBR.spawnBullet(g, {
-        x: p.x + Math.cos(p.aim) * 12, y: p.y + Math.sin(p.aim) * 12, ang: p.aim + (i - (n - 1) / 2) * 0.13,
+        x: p.x + Math.cos(p.aim) * 12, y: p.y + Math.sin(p.aim) * 12, ang: p.aim + (i - (n - 1) / 2) * spread,
         speed: p.bulletSpeed, r: 5, dmg: base * (crit ? 2 : 1), crit: crit, owner: 'p', life: p.range,
         pierce: p.pierce, homing: p.homing, bounce: p.bounce, explode: p.explode, explodeDmg: base * 0.5
       });
@@ -284,7 +285,7 @@
       DBR.spawnBeam(g, { x: p.x, y: p.y, ang: p.aim, w: 26, warn: 0.12, life: 0.78, tick: 0.05, dmg: d * 0.8, owner: 'p', follow: p, color: 1 });
     } else if (c.special === 'bigbang') {   // grosse sphère explosive
       p.specialT = 0.25;
-      DBR.spawnBullet(g, { x: p.x, y: p.y, ang: p.aim, speed: 430, r: 13, dmg: d * 3, owner: 'p', life: 1.4, big: true, explode: 95, explodeDmg: d * 7, color: 2 });
+      DBR.spawnBullet(g, { x: p.x, y: p.y, ang: p.aim, speed: 430, r: 13, dmg: d * 2.5, owner: 'p', life: 1.4, big: true, explode: 95, explodeDmg: d * 5.5, color: 2 });
     } else {                                // makankosappo : rayon perforant instantané
       p.specialT = 0.5;
       DBR.spawnBeam(g, { x: p.x, y: p.y, ang: p.aim, w: 14, warn: 0.3, life: 0.2, dmg: d * 11, owner: 'p', follow: p, color: 3 });

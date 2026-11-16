@@ -22,7 +22,7 @@
         if (kind === 'special') kind = rng.chance(0.5) ? 'heal' : 'treasure';
         rooms.push({
           idx: depth, biome: b, pos: i, kind: kind, depth: depth,
-          hpMul: 1 + depth * 0.1, dmgMul: 1 + depth * 0.04,
+          hpMul: 1.5 + depth * 0.3, dmgMul: 1 + depth * 0.04,
           waves: [], wave: 0, waveT: 0, clearT: 0, seed: rng.int(1, 1e9)
         });
       }
@@ -71,14 +71,14 @@
     p.invuln = Math.max(p.invuln, 0.8);
     g.phase = 'combat';
     var pool = biome.pool.slice(0, Math.min(biome.pool.length, 2 + room.pos + (room.biome > 0 ? 1 : 0)));
-    var budget = 3.5 + room.depth * 0.5;
+    var budget = 6 + room.depth * 0.7;
     if (room.kind === 'combat') {
       makeObstacles(g, rng, rng.int(0, 3));
-      var n = room.depth < 1 ? 2 : 3;
-      for (var i = 0; i < n; i++) room.waves.push(makeWave(rng, pool, budget * (0.8 + i * 0.15)));
+      var n = room.depth < 1 ? 3 : (room.biome < 2 ? 5 : 6);
+      for (var i = 0; i < n; i++) room.waves.push(makeWave(rng, pool, budget * (0.8 + i * 0.12)));
     } else if (room.kind === 'miniboss' && DBR.ENEMIES[biome.miniboss]) {
       makeObstacles(g, rng, 1);
-      room.waves.push([biome.miniboss].concat(makeWave(rng, pool, budget * 0.4)));
+      room.waves.push([biome.miniboss].concat(makeWave(rng, pool, budget * 0.5)));
     } else if (room.kind === 'boss' && DBR.ENEMIES[biome.boss]) {
       room.waves.push([biome.boss]);
     } else if (room.kind === 'miniboss' || room.kind === 'boss') {   // repli tant que les boss n'existent pas
@@ -114,9 +114,13 @@
     var room = g.room, p = g.player;
     if (!room) return;
     if (g.phase === 'combat') {
-      if (g.enemies.length === 0) {
-        if (room.wave < room.waves.length) { if ((room.waveT -= dt) <= 0) { spawnWave(g, room); room.waveT = 0.9; } }
-        else { g.phase = 'cleared'; room.clearT = (room.kind === 'boss' ? 2.2 : 1.1); DBR.clearEnemyBullets(g); DBR.emit(g, 'roomClear', p.x, p.y, { kind: room.kind }); }
+      // Les vagues se chevauchent : la suivante arrive dès qu'il reste au plus 2 ennemis
+      if (room.wave < room.waves.length && g.enemies.length <= (room.wave === 0 ? 0 : 2)) {
+        if ((room.waveT -= dt) <= 0) { spawnWave(g, room); room.waveT = 1.2; }
+      } else if (g.enemies.length === 0 && room.wave >= room.waves.length) {
+        g.phase = 'cleared'; room.clearT = (room.kind === 'boss' ? 2.2 : 1.1);
+        DBR.clearEnemyBullets(g);
+        DBR.emit(g, 'roomClear', p.x, p.y, { kind: room.kind });
       }
     } else if (g.phase === 'cleared') {
       if ((room.clearT -= dt) <= 0) finishRoom(g);

@@ -7,4 +7,4 @@
 - [x] **M5** — 4 biomes (palettes + ennemis), 3 personnages, boutique
 - [x] **M6** — Mini-boss, 3 boss à phases, boss final
 - [x] **M7** — Méta-progression (localStorage), menus (titre, sélection, pause, réglages, fin, victoire, crédits), sons et musique WebAudio
-- [ ] **M8** — Équilibrage (run 20–30 min), tests complets (victoire/défaite/sauvegarde), polish, README
+- [x] **M8** — Équilibrage (run 20–30 min), tests complets (victoire/défaite/sauvegarde), polish, README

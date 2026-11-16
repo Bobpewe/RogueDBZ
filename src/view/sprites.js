@@ -166,6 +166,95 @@
     '.hhhhhhhhhhhh.'
   ]);
 
+  /* --- Boss (dessinés à l'échelle 3) --- */
+  def('raditz', { K: '#16161d', s: '#e8b080', e: '#16161d', a: '#2a2a3a', y: '#b88a3a', b: '#b88a3a' }, [
+    '...KKKKKKKK.....',
+    '..KKKKKKKKKK....',
+    '.KKKKsKKsKKKK...',
+    '.KKKssssssKKK...',
+    '.KKKsessesKKK...',
+    'KKKKssssssKKKK..',
+    'KKK.ssssss.KKK..',
+    'KKyyaaaaaayyKK..',
+    'KyyaaaaaaaayyK..',
+    'Ks.aabbbbaa.sK..',
+    'Ks.aaaaaaaa.sK..',
+    'K..aaa..aaa..K..',
+    '...sss..sss.....',
+    '...sss..sss.....',
+    '...aaa..aaa.....'
+  ]);
+  def('nappa', { s: '#e8b080', e: '#16161d', K: '#16161d', a: '#2a2a3a', y: '#c8a030', b: '#1a1a22', w: '#f4f4f8' }, [
+    '.....ssssss.....',
+    '....ssssssss....',
+    '....ssssssss....',
+    '....sesssses....',
+    '....ssKKKKss....',
+    '.....ssssss.....',
+    '.yyyaaaaaaaayyy.',
+    'yyyaaaaaaaaaayyy',
+    'sss.aaaaaaaa.sss',
+    'sss.aayyyyaa.sss',
+    'sss.aaaaaaaa.sss',
+    '.ww.bbbbbbbb.ww.',
+    '....sss..sss....',
+    '....sss..sss....',
+    '....sss..sss....',
+    '....www..www....'
+  ]);
+  def('freezer', { w: '#f4f4f8', p: '#8a4ac0', e: '#d02020', m: '#4a1a6a' }, [
+    '.....wwwwww.....',
+    '....wwppppww....',
+    '....wwppppww....',
+    '....wewwwwew....',
+    '....wwwwwwww....',
+    '.....wwmmww.....',
+    '...ppwwwwwwpp...',
+    '..ppwwppppwwpp..',
+    '..ww.wppppw.ww..',
+    '..ww.wwwwww.ww..',
+    '..ww.wwppww.ww..',
+    '.....ww..ww...w.',
+    '.....ww..ww..ww.',
+    '.....ww..ww.ww..',
+    '....www..wwww...'
+  ]);
+  def('boo', { p: '#ff8ac0', K: '#16161d', w: '#f4f4f8', y: '#e8b830' }, [
+    '........pp......',
+    '.......pp.......',
+    '.....pppppp.....',
+    '....pppppppp....',
+    '....pKppppKp....',
+    '....pppppppp....',
+    '.....pwwwwp.....',
+    '...pp.pppp.pp...',
+    '..pppppppppppp..',
+    '..pp.pppppp.pp..',
+    '..pp.KKyyKK.pp..',
+    '.....wwwwww.....',
+    '....wwww.wwww...',
+    '....wwww.wwww...',
+    '.....yy...yy....'
+  ]);
+  def('cell', { K: '#16161d', g: '#6ab04a', d: '#2a5a1e', w: '#f4f4f8', p: '#8a4ac0', e: '#d02080', y: '#e8b830' }, [
+    '...K........K...',
+    '...KK......KK...',
+    '...KKggggggKK...',
+    '....gwwwwwwg....',
+    '....pwewwewp....',
+    '....pwwwwwwp....',
+    '.....wwwwww.....',
+    '..KKggKKKKggKK..',
+    '.KKgggdggdgggKK.',
+    '.KK.ggKKKKgg.KK.',
+    '.gg.gdggggdg.gg.',
+    '.ww.gggggggg.ww.',
+    '....ggg..ggg....',
+    '....gdg..gdg....',
+    '....KKK..KKK....',
+    '....yyy..yyy....'
+  ]);
+
   var cache = {};
   /**
    * Retourne un canvas pour (nom, échelle, variante de palette, mode).

@@ -58,7 +58,28 @@
     spectre: { name: 'Spectre du temps', ai: 'ranged', hp: 70, speed: 100, r: 12, dmg: 11, keep: 280, shots: 3, spread: 0.22, bulletSpeed: 280, cd: 1.6, zeni: [4, 7], cost: 2, sprite: 'mage', swap: { h: '#7888b8', e: '#60e0ff' }, color: '#7888b8' },
     shadow: { name: 'Ombre guerrière', ai: 'charger', hp: 140, speed: 95, r: 15, dmg: 18, dashSpeed: 580, cd: 1.2, zeni: [5, 9], cost: 2.5, sprite: 'brute', swap: { a: '#3a3a4a', s: '#5a5a6a', H: '#1a1a22', p: '#2a2a33', b: '#ff4040', e: '#ff4040' }, color: '#3a3a4a' },
     timeorb: { name: 'Sphère du temps', ai: 'turret', hp: 110, speed: 60, r: 12, dmg: 11, shots: 12, bulletSpeed: 195, cd: 2.2, zeni: [5, 9], cost: 3, sprite: 'robot', swap: { m: '#d8b040', d: '#8a6a14', a: '#ffffff', R: '#40a0ff' }, color: '#d8b040' },
-    oracle: { name: 'Oracle', ai: 'summoner', hp: 100, speed: 85, r: 12, dmg: 0, minion: 'celljr', count: 2, cd: 5, zeni: [6, 10], cost: 4, sprite: 'mage', swap: { h: '#c8a030', e: '#ffffff' }, color: '#c8a030' }
+    oracle: { name: 'Oracle', ai: 'summoner', hp: 100, speed: 85, r: 12, dmg: 0, minion: 'celljr', count: 2, cd: 5, zeni: [6, 10], cost: 4, sprite: 'mage', swap: { h: '#c8a030', e: '#ffffff' }, color: '#c8a030' },
+
+    /*
+     * Mini-boss (boss: 1) et boss (boss: 2). Leurs PV sont absolus (non multipliés par la profondeur).
+     * phases[k].at = fraction de PV à laquelle la phase k commence ; attacks = voir bosses.js.
+     */
+    metallic: { name: 'Sergent Métallique', boss: 1, ai: 'boss', hp: 900, speed: 70, r: 20, dmg: 9, bulletSpeed: 220, zeni: [35, 45], cost: 99, sprite: 'robot', scale: 3, color: '#7d8496',
+      phases: [{ at: 1, attacks: ['aimed', 'slam'], rest: 1.3 }] },
+    saibaking: { name: 'Saibaman Alpha', boss: 1, ai: 'boss', hp: 1500, speed: 90, r: 20, dmg: 9, bulletSpeed: 220, minion: 'saibaman', zeni: [45, 55], cost: 99, sprite: 'imp', swap: { g: '#8a5ac0', d: '#5a2a8a', v: '#5a2a8a' }, scale: 3, color: '#8a5ac0',
+      phases: [{ at: 1, attacks: ['summon', 'charge', 'ring'], rest: 1.2 }] },
+    dodoria: { name: 'Dodoria', boss: 1, ai: 'boss', hp: 2400, speed: 85, r: 22, dmg: 9, bulletSpeed: 230, zeni: [55, 65], cost: 99, sprite: 'brute', swap: { a: '#e8e8f0', s: '#e07aa0', H: '#e07aa0', b: '#c8a030', p: '#e07aa0' }, scale: 3, color: '#e07aa0',
+      phases: [{ at: 1, attacks: ['charge', 'ring', 'aimed'], rest: 1.1 }] },
+    cell: { name: 'Cell', boss: 1, ai: 'boss', hp: 3600, speed: 100, r: 20, dmg: 9, bulletSpeed: 240, zeni: [65, 80], cost: 99, sprite: 'cell', scale: 3, color: '#6ab04a',
+      phases: [{ at: 1, attacks: ['beam', 'teleport', 'aimed', 'spiral'], rest: 1 }] },
+    raditz: { name: 'Raditz', boss: 2, ai: 'boss', hp: 1900, speed: 95, r: 20, dmg: 9, bulletSpeed: 230, zeni: [70, 90], cost: 99, sprite: 'raditz', scale: 3, color: '#b88a3a',
+      phases: [{ at: 1, attacks: ['aimed', 'charge'], rest: 1.3 }, { at: 0.5, attacks: ['aimed', 'charge', 'ring'], rest: 1 }] },
+    nappa: { name: 'Nappa', boss: 2, ai: 'boss', hp: 3400, speed: 85, r: 22, dmg: 9, bulletSpeed: 230, zeni: [90, 110], cost: 99, sprite: 'nappa', scale: 3, color: '#c8a030',
+      phases: [{ at: 1, attacks: ['slam', 'charge', 'ring'], rest: 1.2 }, { at: 0.5, attacks: ['slam', 'rain', 'charge', 'beam'], rest: 0.9 }] },
+    freezer: { name: 'Freezer', boss: 2, ai: 'boss', hp: 5400, speed: 110, r: 18, dmg: 9, bulletSpeed: 250, zeni: [110, 130], cost: 99, sprite: 'freezer', scale: 3, color: '#b070e0',
+      phases: [{ at: 1, attacks: ['aimed', 'beam', 'teleport'], rest: 1.1 }, { at: 0.66, attacks: ['spiral', 'beam', 'slam', 'teleport'], rest: 0.9 }, { at: 0.33, attacks: ['spiral', 'rain', 'beam', 'charge', 'teleport'], rest: 0.7 }] },
+    boo: { name: 'Boo', boss: 2, ai: 'boss', hp: 8000, speed: 115, r: 20, dmg: 9, bulletSpeed: 255, minion: 'phantom', zeni: [0, 0], cost: 99, sprite: 'boo', scale: 3, color: '#ff8ac0',
+      phases: [{ at: 1, attacks: ['ring', 'aimed', 'charge', 'summon'], rest: 1 }, { at: 0.66, attacks: ['spiral', 'slam', 'teleport', 'beam'], rest: 0.85 }, { at: 0.33, attacks: ['spiral', 'rain', 'beam', 'charge', 'teleport', 'summon'], rest: 0.65 }] }
   };
 
   /*

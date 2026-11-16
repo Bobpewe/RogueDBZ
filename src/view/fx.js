@@ -68,6 +68,8 @@
         case 'death': R.shake = 26; R.flash = 0.4; burst(e.x, e.y, 60, '#ff9a2e', 300, 1, 4); app.hitstop = 20; break;
         case 'roomClear': text(W / 2, H / 2 - 40, 'SALLE NETTOYÉE', '#ffe23e', 22); break;
         case 'bossPhase': R.flash = 0.4; R.shake = 16; ring(e.x, e.y, 200, '#ff5a3a'); burst(e.x, e.y, 40, '#ff5a3a', 300, 0.7, 4); app.hitstop = 8; break;
+        case 'bossIntro': text(W / 2, H / 2 - 70, e.name.toUpperCase(), e.boss > 1 ? '#ff5a8a' : '#ff9a3a', 30); R.texts[R.texts.length - 1].life = 2; R.shake = 10; break;
+        case 'teleport': burst(e.x, e.y, 24, '#e0b0ff', 220, 0.4, 3); ring(e.x, e.y, 40, '#e0b0ff'); break;
         case 'buy': burst(e.x, e.y, 16, '#ffd23e', 160, 0.5, 3); text(e.x, e.y - 20, e.label || 'Acheté !', '#ffd23e', 12); break;
         case 'heal': burst(e.x, e.y, 20, '#6fe06f', 160, 0.6, 3); text(e.x, e.y - 24, '+' + e.val + ' PV', '#6fe06f', 14); break;
         case 'noZeni': text(e.x, e.y - 20, 'Pas assez de Zeni', '#ff7070', 12); break;
@@ -127,25 +129,23 @@
         continue;
       }
       c.fillStyle = 'rgba(0,0,0,0.28)'; c.beginPath(); c.ellipse(e.x, e.y + e.r, e.r, e.r * 0.4, 0, 0, TAU); c.fill();
-      if (e.state === 'windup') {          // télégraphes d'attaque
-        var w = 1 - e.t / (e.t0 || 0.5);
-        if (d.ai === 'charger' || e.atk === 'charge') {
-          c.strokeStyle = 'rgba(255,60,40,' + (0.3 + 0.5 * w) + ')'; c.lineWidth = e.r * 1.6;
-          c.beginPath(); c.moveTo(e.x, e.y); c.lineTo(e.x + Math.cos(e.ang) * 300, e.y + Math.sin(e.ang) * 300); c.stroke();
-        } else if (d.ai === 'melee') {
-          c.strokeStyle = 'rgba(255,60,40,0.8)'; c.lineWidth = 2;
-          c.beginPath(); c.arc(e.x, e.y, (e.r + p.r + d.reach) * w, 0, TAU); c.stroke();
-        } else if (d.ai === 'bomber') {
-          c.fillStyle = 'rgba(255,60,40,' + (0.15 + 0.25 * w) + ')'; c.beginPath(); c.arc(e.x, e.y, 70, 0, TAU); c.fill();
-        }
+      var w = 1 - e.t / (e.t0 || 0.5);     // avancement du télégraphe d'attaque (0 -> 1)
+      if ((e.state === 'windup' && d.ai === 'charger') || e.tele === 'charge') {
+        c.strokeStyle = 'rgba(255,60,40,' + (0.25 + 0.4 * w) + ')'; c.lineWidth = e.r * 1.6;
+        c.beginPath(); c.moveTo(e.x, e.y); c.lineTo(e.x + Math.cos(e.ang) * 300, e.y + Math.sin(e.ang) * 300); c.stroke();
+      } else if (e.state === 'windup' && d.ai === 'melee') {
+        c.strokeStyle = 'rgba(255,60,40,0.8)'; c.lineWidth = 2;
+        c.beginPath(); c.arc(e.x, e.y, (e.r + p.r + d.reach) * w, 0, TAU); c.stroke();
+      } else if (e.state === 'windup' && d.ai === 'bomber') {
+        c.fillStyle = 'rgba(255,60,40,' + (0.15 + 0.25 * w) + ')'; c.beginPath(); c.arc(e.x, e.y, 70, 0, TAU); c.fill();
       }
-      var white = e.flash > 0 || (e.state === 'windup' && Math.floor(R.t * 14) % 2 === 0 && d.ai !== 'boss');
+      var white = e.flash > 0 || ((e.state === 'windup' || e.tele === 'cast') && Math.floor(R.t * 14) % 2 === 0);
       var bob = e.state === 'move' ? Math.round(Math.sin(R.t * 12 + e.id) * 1.5) : 0;
       var tele = e.invuln > 0 && d.boss ? 0.5 : 1;
       c.globalAlpha = tele;
       R.sprite(d.sprite, e.x, e.y - 2 + bob, sc, e.face < 0, d.swap, white);
       c.globalAlpha = 1;
-      if (e.state === 'windup' && d.ai !== 'boss') { c.fillStyle = '#ffe23e'; c.font = 'bold 14px monospace'; c.textAlign = 'center'; c.fillText('!', e.x, e.y - e.r - 12); }
+      if (e.state === 'windup' || e.tele === 'cast' || e.tele === 'charge') { c.fillStyle = '#ffe23e'; c.font = 'bold 14px monospace'; c.textAlign = 'center'; c.fillText('!', e.x, e.y - e.r * (d.scale === 3 ? 1.6 : 1) - 12); }
       if (e.hp < e.maxHp && !d.boss) {     // petite barre de vie
         c.fillStyle = '#000000'; c.fillRect(Math.round(e.x - 13), Math.round(e.y + e.r + 6), 26, 4);
         c.fillStyle = '#e03030'; c.fillRect(Math.round(e.x - 12), Math.round(e.y + e.r + 7), Math.round(24 * e.hp / e.maxHp), 2);

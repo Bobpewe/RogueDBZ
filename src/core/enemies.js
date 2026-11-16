@@ -13,7 +13,7 @@
   /** Fait apparaître un ennemi (avec un court télégraphe d'apparition). */
   DBR.spawnEnemy = function (g, kind, x, y, o) {
     var def = DBR.ENEMIES[kind]; o = o || {};
-    var hpMul = (g.room ? g.room.hpMul : 1), dmgMul = (g.room ? g.room.dmgMul : 1);
+    var hpMul = (g.room && !def.boss ? g.room.hpMul : 1), dmgMul = (g.room ? g.room.dmgMul : 1);
     g.nextId = (g.nextId || 0) + 1;
     var e = {
       id: g.nextId, kind: kind, def: def, x: x, y: y, r: def.r, hp: Math.round(def.hp * hpMul), maxHp: Math.round(def.hp * hpMul),
@@ -23,6 +23,7 @@
     };
     DBR.collideWorld(g, e);
     g.enemies.push(e);
+    if (def.boss) DBR.emit(g, 'bossIntro', e.x, e.y, { name: def.name, boss: def.boss });
     return e;
   };
 
@@ -145,10 +146,10 @@
       e.flash -= dt; e.cd -= dt; e.invuln -= dt;
       e.x += e.kx * dt; e.y += e.ky * dt; e.kx *= 0.82; e.ky *= 0.82;
       var v = vec(e, p);
-      if (e.state !== 'dash') e.face = p.x >= e.x ? 1 : -1;
+      if (e.state !== 'dash' && e.tele !== 'dash') e.face = p.x >= e.x ? 1 : -1;
       (AI[e.def.ai] || AI.melee)(g, e, p, v, dt);
       if (e.dead) continue;
-      if (e.state !== 'dash') {
+      if (e.state !== 'dash' && e.tele !== 'dash') {
         for (j = 0; j < g.enemies.length; j++) {     // séparation : évite l'empilement
           o = g.enemies[j];
           if (o === e || o.dead || o.spawnT > 0) continue;

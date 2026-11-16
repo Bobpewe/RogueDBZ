@@ -1,10 +1,10 @@
 # PROGRESS
 
 ## État actuel
-M5 terminé et testé (14 tests OK). Jalon en cours : **M6**.
+M6 terminé et testé (16 tests OK). Jalon en cours : **M7**.
 
 ## Prochaine action
-M6 : bosses.js (IA de boss à phases, attaques composables), données + sprites des 4 mini-boss et 4 boss.
+M7 : meta.js (sauvegarde, orbes, bonus, déblocages), audio.js (WebAudio), menus dans ui.js, machine à états dans main.js.
 
 ## Décisions prises
 - Pas de modules ES : chaque fichier est une IIFE qui remplit l'espace de noms global `DBR` (window ou globalThis sous Node).

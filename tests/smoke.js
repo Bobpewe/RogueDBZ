@@ -129,9 +129,9 @@ function botInput(g) {
   for (i = 0; i < g.enemies.length; i++) {      // s'écarte des ennemis proches
     e = g.enemies[i]; d = DBR.U.dist(p.x, p.y, e.x, e.y);
     if (d < 150) { push(e.x, e.y, (150 - d) / 50); if (e.state === 'windup' && d < 90) danger = true; }
-    if ((e.state === 'windup' || e.state === 'dash') && (e.def.ai === 'charger' || e.atk === 'charge')) {   // sort de l'axe de charge
+    if (((e.state === 'windup' || e.state === 'dash') && e.def.ai === 'charger') || e.tele === 'charge' || e.tele === 'dash') {   // sort de l'axe de charge
       var ex = e.x + Math.cos(e.ang) * 500, ey = e.y + Math.sin(e.ang) * 500;
-      if (DBR.U.segDist(p.x, p.y, e.x, e.y, ex, ey) < 50) { fx += -Math.sin(e.ang) * 3; fy += Math.cos(e.ang) * 3; if (e.state === 'dash' && d < 120) danger = true; }
+      if (DBR.U.segDist(p.x, p.y, e.x, e.y, ex, ey) < 50) { fx += -Math.sin(e.ang) * 3; fy += Math.cos(e.ang) * 3; if ((e.state === 'dash' || e.tele === 'dash') && d < 120) danger = true; }
     }
   }
   for (i = 0; i < g.bullets.length; i++) {      // esquive les tirs ennemis
@@ -275,6 +275,37 @@ test('chaque biome : 1500 frames de combat sans exception', function () {
     for (var i = 0; i < 1500 && !g.over; i++) { if (g.phase === 'reward') botChoose(g); DBR.step(g, botInput(g)); g.events.length = 0; }
     assert(g.stats.kills > 0, 'aucune élimination dans ' + DBR.BIOMES[b].name);
   }
+});
+
+/* ---------- Boss (M6) ---------- */
+test('boss : 4 mini-boss + 3 boss + boss final, attaques toutes définies', function () {
+  var n = [0, 0, 0];
+  DBR.BIOMES.forEach(function (b) {
+    [b.miniboss, b.boss].forEach(function (k) {
+      var d = DBR.ENEMIES[k]; assert(d && d.ai === 'boss' && d.phases.length, 'boss invalide : ' + k); n[d.boss]++;
+      d.phases.forEach(function (ph) { ph.attacks.forEach(function (a) { assert(DBR.BOSS_ATK[a], 'attaque inconnue : ' + a); }); });
+    });
+  });
+  assert(n[1] === 4 && n[2] === 4, 'compte de boss');
+  assert(DBR.ENEMIES[DBR.BIOMES[3].boss].phases.length >= 3, 'le boss final doit avoir 3 phases');
+  return 'attaques : ' + Object.keys(DBR.BOSS_ATK).join(', ');
+});
+
+test('boss : chaque combat traverse toutes ses phases jusqu\'à la mort du boss', function () {
+  var out = [];
+  DBR.BIOMES.forEach(function (b, bi) {
+    [3, 5].forEach(function (pos) {
+      var g = DBR.createGame({ seed: 60 + bi }), p = g.player, maxPhase = 0, n = 0;
+      p.hp = p.maxHp = 1e6; p.dmg = 12 + bi * 9;
+      DBR.enterRoom(g, bi * 6 + pos);
+      while (g.phase === 'combat' && n++ < 60 * 300) { DBR.step(g, botInput(g)); g.enemies.forEach(function (e) { if (e.def.boss) maxPhase = Math.max(maxPhase, e.phase); }); g.events.length = 0; }
+      var def = DBR.ENEMIES[pos === 3 ? b.miniboss : b.boss];
+      assert(g.phase !== 'combat', def.name + ' invaincu après 5 min');
+      assert(maxPhase === def.phases.length - 1, def.name + ' : phase max ' + maxPhase);
+      out.push(def.name + ' ' + (n / 60).toFixed(0) + ' s (-' + (1e6 - Math.ceil(p.hp)) + ' PV)');
+    });
+  });
+  return out.join(', ');
 });
 
 /* __TESTS_SUIVANTS__ */

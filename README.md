@@ -2,6 +2,8 @@
 
 Roguelike d'action 2D en vue de dessus, solo, jouable directement dans le navigateur, dans l'univers de Dragon Ball.
 
+**▶ Jouer en ligne : https://bobpewe.github.io/RogueDBZ/**
+
 > **Fan game non commercial, non affilié à Bird Studio/Shueisha/Toei.**
 > Aucun asset officiel : tous les sprites, effets, sons et musiques sont générés par le code.
 
@@ -57,6 +59,8 @@ puis ouvre `http://localhost:8000`.
 2. Dans le dépôt : **Settings → Pages → Build and deployment → Source : « Deploy from a branch »**.
 3. Choisis la branche `main` et le dossier `/ (root)`, puis **Save**.
 4. Après une minute, le jeu est en ligne sur `https://<utilisateur>.github.io/<dépôt>/`.
+
+Ce dépôt est publié ainsi sur https://bobpewe.github.io/RogueDBZ/.
 
 Le projet n'utilise que des chemins relatifs : il fonctionne tel quel dans un sous-dossier.
 

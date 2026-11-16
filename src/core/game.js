@@ -46,7 +46,7 @@
     return p;
   };
 
-  /** Crée une partie. opts = { seed, charId, perks, difficulty } */
+  /** Crée une partie. opts = { seed, charId, perks, difficulty, noRun } */
   DBR.createGame = function (opts) {
     opts = opts || {};
     var seed = (opts.seed >>> 0) || 12345;
@@ -59,6 +59,8 @@
       enemies: [], bullets: [], beams: [], zones: [], pickups: [], props: [], obstacles: [],
       stats: { kills: 0, dmgDealt: 0, dmgTaken: 0, rooms: 0, zeni: 0, bosses: 0 }
     };
+    // opts.noRun : partie « bac à sable » sans salles (utilisée par les tests unitaires)
+    if (DBR.buildRun && !opts.noRun) { DBR.buildRun(g); DBR.enterRoom(g, 0); }
     return g;
   };
 

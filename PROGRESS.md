@@ -1,10 +1,10 @@
 # PROGRESS
 
 ## État actuel
-M2 terminé et testé (6 tests OK). Jalon en cours : **M3**.
+M3 terminé et testé (8 tests OK). Jalon en cours : **M4**.
 
 ## Prochaine action
-M3 : run.js (plan du run, vagues, porte, obstacles), hud.js (HUD + porte), IA de test dans smoke.js.
+M4 : upgrades.js (~26 améliorations, raretés, tirage 1 parmi 3, salles soin/trésor), ui.js (cartes de choix).
 
 ## Décisions prises
 - Pas de modules ES : chaque fichier est une IIFE qui remplit l'espace de noms global `DBR` (window ou globalThis sous Node).

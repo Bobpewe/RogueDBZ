@@ -29,4 +29,14 @@
     brute: { name: 'Colosse', ai: 'charger', hp: 60, speed: 70, r: 15, dmg: 14, dashSpeed: 470, cd: 1.6, zeni: [3, 6], cost: 2.5, sprite: 'brute', color: '#a5653a' },
     tamer: { name: 'Dresseur', ai: 'summoner', hp: 42, speed: 75, r: 12, dmg: 0, minion: 'wolf', count: 2, cd: 5.5, zeni: [4, 7], cost: 3, sprite: 'mage', color: '#5b3f8a' }
   };
+
+  /*
+   * Biomes : palette du décor, ennemis (du plus simple au plus retors), mini-boss et boss.
+   */
+  DBR.BIOMES = [
+    {
+      id: 'plaines', name: 'Plaines', pool: ['wolf', 'soldier', 'brute', 'tamer'], miniboss: 'metallic', boss: 'raditz',
+      pal: { floor: '#4f9a4a', floor2: '#4b9446', speck: '#6fbd62', wall: '#3a5a34', wallTop: '#5c8a50', wallDark: '#24381f', rock: '#8a8c94', rockDark: '#55575e', accent: '#ffe066' }
+    }
+  ];
 })();

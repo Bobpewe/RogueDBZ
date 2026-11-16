@@ -13,10 +13,6 @@
   App.startRun = function (charId, seed) {
     App.game = DBR.createGame({ seed: seed || ((Math.random() * 4294967295) >>> 0), charId: charId || 'goku' });
     App.state = 'play';
-    var g = App.game;
-    if (!DBR.enterRoom) {   // démo M2 : quelques ennemis tant que les salles n'existent pas
-      ['wolf', 'wolf', 'soldier', 'brute', 'tamer'].forEach(function (k, i) { DBR.spawnEnemy(g, k, 200 + i * 140, 120); });
-    }
   };
 
   function frame(now) {

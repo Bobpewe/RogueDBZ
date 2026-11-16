@@ -41,7 +41,7 @@ function snapshot(g) { var p = g.player; return [g.frame, p.x.toFixed(3), p.y.to
 
 test('600 frames sans exception, joueur dans la salle', function () {
   var g = DBR.createGame({ seed: 7 }), r = new DBR.RNG(1);
-  for (var i = 0; i < 600; i++) {
+  for (var i = 0; i < 600 && !g.over; i++) {
     DBR.step(g, noiseInput(r, g));
     if (g.phase === 'reward' && DBR.chooseUpgrade) DBR.chooseUpgrade(g, 0);
     var p = g.player;
@@ -65,7 +65,7 @@ test('même graine + mêmes entrées = même état', function () {
 
 /* ---------- Combat (M2) ---------- */
 test('combat : tirs, dégâts, mort des ennemis, butin', function () {
-  var g = DBR.createGame({ seed: 3 });
+  var g = DBR.createGame({ seed: 3, noRun: true });
   ['wolf', 'soldier', 'brute', 'tamer'].forEach(function (k, i) { DBR.spawnEnemy(g, k, 200 + i * 150, 120, { spawnT: 0 }); });
   g.player.dmg = 200; g.player.hp = g.player.maxHp = 1e6;
   for (var i = 0; i < 1800 && g.enemies.length; i++) {
@@ -82,7 +82,7 @@ test('combat : tirs, dégâts, mort des ennemis, butin', function () {
 });
 
 test('combat : dash invulnérable, Ki consommé, ultime, mort définitive', function () {
-  var g = DBR.createGame({ seed: 4 }), p = g.player;
+  var g = DBR.createGame({ seed: 4, noRun: true }), p = g.player;
   DBR.step(g, { dash: true, mx: 1 });
   assert(p.dashT > 0 && p.invuln > 0, 'dash sans invulnérabilité');
   assert(DBR.hurtPlayer(g, 10) === false && p.hp === p.maxHp, 'touché pendant le dash');
@@ -95,6 +95,113 @@ test('combat : dash invulnérable, Ki consommé, ultime, mort définitive', func
   p.invuln = 0; DBR.hurtPlayer(g, 99999);
   assert(g.over && g.phase === 'dead' && p.hp === 0, 'la mort doit terminer le run');
   var f = g.frame; DBR.step(g, {}); assert(g.frame === f, 'la simulation doit se figer après la mort');
+});
+
+/* ---------- IA de test : joue « correctement » sans tricher ---------- */
+var W = DBR.W, H = DBR.H, WALL = DBR.WALL;
+function botInput(g) {
+  var p = g.player, inp = { mx: 0, my: 0, ax: p.x, ay: p.y - 50, fire: false, dash: false, special: false, ultra: false, interact: false };
+  var fx = 0, fy = 0, i, d, e, danger = false;
+  function push(x, y, w) { var dx = p.x - x, dy = p.y - y, l = Math.sqrt(dx * dx + dy * dy) || 1; fx += dx / l * w; fy += dy / l * w; }
+  if (g.phase === 'open') {                     // hors combat : objets utiles puis porte
+    var tx = W / 2, ty = WALL, best = 1e9;
+    for (i = 0; i < g.props.length; i++) {
+      var o = g.props[i];
+      if (o.used || (o.cost && o.cost > p.zeni) || (o.kind === 'senzu' && p.hp >= p.maxHp) || (o.kind === 'shopHeal' && p.hp > p.maxHp * 0.7)) continue;
+      d = DBR.U.dist(p.x, p.y, o.x, o.y);
+      if (d < best) { best = d; tx = o.x; ty = o.y; }
+    }
+    d = DBR.U.dist(p.x, p.y, tx, ty) || 1;
+    inp.mx = (tx - p.x) / d; inp.my = (ty - p.y) / d; inp.interact = g.frame % 20 < 10;
+    if (ty === WALL && Math.abs(tx - p.x) < 20) { inp.mx = 0; inp.my = -1; }
+    return inp;
+  }
+  var t = DBR.nearestEnemy(g, p.x, p.y, 1e9);
+  if (t) {
+    d = DBR.U.dist(p.x, p.y, t.x, t.y);
+    inp.ax = t.x; inp.ay = t.y; inp.fire = true;
+    inp.special = p.ki >= p.specialCost && g.frame % 2 === 0;
+    inp.ultra = p.ultra >= 100 && g.frame % 2 === 0;
+    var want = t.def.boss ? 250 : 210;         // garde ses distances et tourne autour de la cible
+    var k = (d - want) / 100, dx = (t.x - p.x) / d, dy = (t.y - p.y) / d;
+    fx += dx * k - dy * 0.6; fy += dy * k + dx * 0.6;
+  }
+  for (i = 0; i < g.enemies.length; i++) {      // s'écarte des ennemis proches
+    e = g.enemies[i]; d = DBR.U.dist(p.x, p.y, e.x, e.y);
+    if (d < 150) { push(e.x, e.y, (150 - d) / 50); if (e.state === 'windup' && d < 90) danger = true; }
+    if ((e.state === 'windup' || e.state === 'dash') && (e.def.ai === 'charger' || e.atk === 'charge')) {   // sort de l'axe de charge
+      var ex = e.x + Math.cos(e.ang) * 500, ey = e.y + Math.sin(e.ang) * 500;
+      if (DBR.U.segDist(p.x, p.y, e.x, e.y, ex, ey) < 50) { fx += -Math.sin(e.ang) * 3; fy += Math.cos(e.ang) * 3; if (e.state === 'dash' && d < 120) danger = true; }
+    }
+  }
+  for (i = 0; i < g.bullets.length; i++) {      // esquive les tirs ennemis
+    var b = g.bullets[i];
+    if (b.owner !== 'e') continue;
+    d = DBR.U.dist(p.x, p.y, b.x, b.y);
+    if (d < 110) {
+      var sp = Math.sqrt(b.vx * b.vx + b.vy * b.vy) || 1, nx = -b.vy / sp, ny = b.vx / sp;
+      var side = ((p.x - b.x) * nx + (p.y - b.y) * ny) >= 0 ? 1 : -1;
+      var w = (110 - d) / 30; fx += nx * side * w; fy += ny * side * w;
+      if (d < 34) danger = true;
+    }
+  }
+  for (i = 0; i < g.zones.length; i++) {        // sort des zones d'impact
+    var z = g.zones[i]; d = DBR.U.dist(p.x, p.y, z.x, z.y);
+    if (z.owner === 'e' && d < z.r + 40) { push(z.x, z.y, 4); if (z.warn < 0.25 && d < z.r + 6) danger = true; }
+  }
+  for (i = 0; i < g.beams.length; i++) {        // s'écarte des rayons
+    var bm = g.beams[i];
+    if (bm.owner !== 'e') continue;
+    var bx = bm.x + Math.cos(bm.ang) * bm.len, by = bm.y + Math.sin(bm.ang) * bm.len;
+    if (DBR.U.segDist(p.x, p.y, bm.x, bm.y, bx, by) < bm.w / 2 + 50) {
+      var sd = (-(p.x - bm.x) * Math.sin(bm.ang) + (p.y - bm.y) * Math.cos(bm.ang)) >= 0 ? 1 : -1;
+      fx += -Math.sin(bm.ang) * sd * 4; fy += Math.cos(bm.ang) * sd * 4;
+      if (bm.warn < 0.2) danger = true;
+    }
+  }
+  for (i = 0; i < g.obstacles.length; i++) { var ob = g.obstacles[i]; d = DBR.U.dist(p.x, p.y, ob.x, ob.y); if (d < ob.r + 40) push(ob.x, ob.y, 1.5); }
+  // reste à l'écart des murs
+  if (p.x < 130) fx += (130 - p.x) / 40; if (p.x > W - 130) fx -= (p.x - W + 130) / 40;
+  if (p.y < 120) fy += (120 - p.y) / 40; if (p.y > H - 120) fy -= (p.y - H + 120) / 40;
+  var l = Math.sqrt(fx * fx + fy * fy);
+  if (l > 0.05) { inp.mx = fx / l; inp.my = fy / l; }
+  inp.dash = danger && p.dashCd <= 0 && g.frame % 2 === 0;
+  return inp;
+}
+/** Choix d'amélioration de l'IA : la plus rare proposée. */
+function botChoose(g) {
+  var best = 0;
+  for (var i = 1; i < g.choice.length; i++) if (DBR.UPGRADES[g.choice[i]].rar > DBR.UPGRADES[g.choice[best]].rar) best = i;
+  DBR.chooseUpgrade(g, best);
+}
+/** Joue un run entier avec l'IA. Retourne la partie terminée (ou interrompue à maxFrames). */
+function playRun(opts, maxFrames, idle) {
+  var g = DBR.createGame(opts), n = 0;
+  while (!g.over && n++ < maxFrames) {
+    if (g.phase === 'reward') botChoose(g);
+    DBR.step(g, idle ? {} : botInput(g));
+    g.events.length = 0;
+  }
+  return g;
+}
+function fmt(g) { return 'salle ' + (g.roomIndex + 1) + '/' + g.rooms.length + ', ' + (g.time / 60).toFixed(1) + ' min simulées, ' + g.stats.kills + ' éliminations, PV ' + Math.ceil(g.player.hp) + '/' + g.player.maxHp; }
+
+/* ---------- Progression (M3) ---------- */
+test('run : plan des salles reproductible par la graine', function () {
+  var a = DBR.createGame({ seed: 123 }), b = DBR.createGame({ seed: 123 }), c = DBR.createGame({ seed: 124 });
+  var ka = a.rooms.map(function (r) { return r.kind + r.seed; }).join(','), kb = b.rooms.map(function (r) { return r.kind + r.seed; }).join(',');
+  assert(ka === kb, 'plan différent pour la même graine');
+  assert(ka !== c.rooms.map(function (r) { return r.kind + r.seed; }).join(','), 'plan identique pour deux graines');
+  assert(a.rooms.length === DBR.BIOMES.length * 6, 'nombre de salles');
+  return a.rooms.length + ' salles';
+});
+
+test('run : l\'IA nettoie la première salle et franchit la porte', function () {
+  var g = DBR.createGame({ seed: 11 }), n = 0;
+  g.player.hp = g.player.maxHp = 5000;
+  while (g.roomIndex < 2 && !g.over && n++ < 60 * 240) { if (g.phase === 'reward') botChoose(g); DBR.step(g, botInput(g)); g.events.length = 0; }
+  assert(g.roomIndex >= 2, 'bloqué en ' + fmt(g) + ' phase=' + g.phase);
+  return fmt(g);
 });
 
 /* __TESTS_SUIVANTS__ */

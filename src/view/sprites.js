@@ -32,6 +32,104 @@
     '...bbb..bbb.....'
   ]);
 
+  /* --- Ennemis de base (recolorés selon le biome via "swap") --- */
+  // Bête à quatre pattes, vue de profil (regarde à droite)
+  def('beast', { G: '#8d8f9c', D: '#5d5f6c', e: '#ff3030', w: '#ffffff', K: '#16161d' }, [
+    '...........G.G..',
+    '..........GGGGG.',
+    'G........GGGeGGw',
+    'GG..GGGGGGGGGGGK',
+    '.GGGGGGGGGGGGww.',
+    '..GGGGGGGGGGG...',
+    '..GGGGGGGGGG....',
+    '..GG.GG..GG.GG..',
+    '..GG.GG..GG.GG..',
+    '..DD.DD..DD.DD..'
+  ]);
+  // Soldat casqué avec pistolet
+  def('soldier', { H: '#b33a3a', s: '#f2c08c', e: '#16161d', u: '#5a6a4a', G: '#2a2a33', b: '#2a2a33', K: '#16161d' }, [
+    '....HHHHHH......',
+    '...HHHHHHHH.....',
+    '...HssssssH.....',
+    '...sesssses.....',
+    '...ssssssss.....',
+    '....ssssss......',
+    '...uuuuuuuu.....',
+    '..uuuuuuuuuu.GG.',
+    '..suuuuuuuusGGGG',
+    '..s.uuuuuu.s.G..',
+    '....uubbuu......',
+    '....uu..uu......',
+    '....uu..uu......',
+    '....KK..KK......'
+  ]);
+  // Colosse
+  def('brute', { H: '#3a2a1e', s: '#d9a070', e: '#16161d', a: '#a5653a', b: '#ffe066', p: '#4a4a5a', K: '#16161d' }, [
+    '.....HHHHHH.....',
+    '....HHHHHHHH....',
+    '....sesssses....',
+    '....ssssssss....',
+    '..aaasssssaaa...',
+    '.aaaaaaaaaaaaa..',
+    'saaaaaaaaaaaaas.',
+    'ss.aaaaaaaaa.ss.',
+    'ss.aaabbbaaa.ss.',
+    'ss.aaaaaaaaa.ss.',
+    '...aaaaaaaaa....',
+    '...ppp...ppp....',
+    '...ppp...ppp....',
+    '...ppp...ppp....',
+    '...KKK...KKK....'
+  ]);
+  // Petit alien à grosse tête (Saibaman, Cell Jr...)
+  def('imp', { g: '#5fae3c', v: '#3c7a26', R: '#e02020', w: '#ffffff', d: '#3c7a26' }, [
+    '...gggggg...',
+    '..gggggggg..',
+    '.gggvggvggg.',
+    '.gRRggggRRg.',
+    '.gggggggggg.',
+    '..ggwwwwgg..',
+    '...gggggg...',
+    '..gddddddg..',
+    '.gg.dddd.gg.',
+    '.g..dddd..g.',
+    '....d..d....',
+    '...gg..gg...'
+  ]);
+  // Robot / drone
+  def('robot', { a: '#c9ccd6', m: '#7d8496', R: '#ff4040', d: '#444a5a' }, [
+    '.....aa.....',
+    '.....aa.....',
+    '..mmmmmmmm..',
+    '.mmmmmmmmmm.',
+    '.mRRmmmmRRm.',
+    '.mRRmmmmRRm.',
+    '.mmmmmmmmmm.',
+    '.mmddddddmm.',
+    '..mmmmmmmm..',
+    '.mm.mmmm.mm.',
+    '.mm.m..m.mm.',
+    '....m..m....',
+    '...dd..dd...'
+  ]);
+  // Invocateur encapuchonné
+  def('mage', { h: '#5b3f8a', K: '#16161d', e: '#ffe23e', s: '#f2c08c' }, [
+    '.....hhhh.....',
+    '....hhhhhh....',
+    '...hhhhhhhh...',
+    '...hKKKKKKh...',
+    '...hKeKKeKh...',
+    '...hhKKKKhh...',
+    '..hhhhhhhhhh..',
+    '.hhhhhhhhhhhh.',
+    '.hhsshhhhsshh.',
+    '..hhhhhhhhhh..',
+    '..hhhhhhhhhh..',
+    '..hhhhhhhhhh..',
+    '.hhhhhhhhhhhh.',
+    '.hhhhhhhhhhhh.'
+  ]);
+
   var cache = {};
   /**
    * Retourne un canvas pour (nom, échelle, variante de palette, mode).

@@ -1,10 +1,10 @@
 # PROGRESS
 
 ## État actuel
-M1 terminé et testé (4 tests OK). Jalon en cours : **M2**.
+M2 terminé et testé (6 tests OK). Jalon en cours : **M3**.
 
 ## Prochaine action
-M2 : combat.js (tirs, dash, Ki, spécial, ultime, dégâts), enemies.js (IA), fx.js (particules, shake, hit-stop).
+M3 : run.js (plan du run, vagues, porte, obstacles), hud.js (HUD + porte), IA de test dans smoke.js.
 
 ## Décisions prises
 - Pas de modules ES : chaque fichier est une IIFE qui remplit l'espace de noms global `DBR` (window ou globalThis sous Node).

@@ -63,6 +63,40 @@ test('même graine + mêmes entrées = même état', function () {
   return a;
 });
 
+/* ---------- Combat (M2) ---------- */
+test('combat : tirs, dégâts, mort des ennemis, butin', function () {
+  var g = DBR.createGame({ seed: 3 });
+  ['wolf', 'soldier', 'brute', 'tamer'].forEach(function (k, i) { DBR.spawnEnemy(g, k, 200 + i * 150, 120, { spawnT: 0 }); });
+  g.player.dmg = 200; g.player.hp = g.player.maxHp = 1e6;
+  for (var i = 0; i < 1800 && g.enemies.length; i++) {
+    var e = g.enemies[0];
+    DBR.step(g, { ax: e.x, ay: e.y, fire: true, dash: i % 90 === 0, special: i % 200 === 0, mx: Math.sin(i / 40), my: 0 });
+    g.events.length = 0;
+  }
+  assert(g.enemies.length === 0, 'ennemis restants : ' + g.enemies.length);
+  assert(g.stats.kills >= 4 && g.stats.dmgDealt > 0, 'stats de combat');
+  g.phase = 'open';   // salle nettoyée : le butin est aimanté vers le joueur
+  for (i = 0; i < 300; i++) DBR.step(g, {});
+  assert(g.player.zeni > 0, 'aucun Zeni ramassé');
+  return g.stats.kills + ' éliminations, ' + g.player.zeni + ' Zeni';
+});
+
+test('combat : dash invulnérable, Ki consommé, ultime, mort définitive', function () {
+  var g = DBR.createGame({ seed: 4 }), p = g.player;
+  DBR.step(g, { dash: true, mx: 1 });
+  assert(p.dashT > 0 && p.invuln > 0, 'dash sans invulnérabilité');
+  assert(DBR.hurtPlayer(g, 10) === false && p.hp === p.maxHp, 'touché pendant le dash');
+  for (var i = 0; i < 60; i++) DBR.step(g, {});
+  var ki = p.ki; DBR.step(g, { special: true, ax: 0, ay: 0 });
+  assert(p.ki < ki && g.beams.length === 1, 'spécial non lancé');
+  p.ultra = 100; for (i = 0; i < 70; i++) DBR.step(g, {});
+  DBR.step(g, { ultra: true });
+  assert(p.ultraT > 0 && DBR.playerDamage(g, p) > p.dmg, 'transformation inactive');
+  p.invuln = 0; DBR.hurtPlayer(g, 99999);
+  assert(g.over && g.phase === 'dead' && p.hp === 0, 'la mort doit terminer le run');
+  var f = g.frame; DBR.step(g, {}); assert(g.frame === f, 'la simulation doit se figer après la mort');
+});
+
 /* __TESTS_SUIVANTS__ */
 
 console.log('== ' + passed + ' réussi(s), ' + failed + ' échec(s) ==');

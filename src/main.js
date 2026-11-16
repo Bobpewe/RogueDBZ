@@ -13,6 +13,10 @@
   App.startRun = function (charId, seed) {
     App.game = DBR.createGame({ seed: seed || ((Math.random() * 4294967295) >>> 0), charId: charId || 'goku' });
     App.state = 'play';
+    var g = App.game;
+    if (!DBR.enterRoom) {   // démo M2 : quelques ennemis tant que les salles n'existent pas
+      ['wolf', 'wolf', 'soldier', 'brute', 'tamer'].forEach(function (k, i) { DBR.spawnEnemy(g, k, 200 + i * 140, 120); });
+    }
   };
 
   function frame(now) {
@@ -23,7 +27,10 @@
       App.acc -= DBR.DT;
       if (App.update) App.update();                     // menus + jeu (défini par ui.js)
       else if (App.hitstop > 0) App.hitstop--;
-      else DBR.step(App.game, DBR.Input.gameInput(App.game));
+      else {
+        DBR.step(App.game, DBR.Input.gameInput(App.game));
+        DBR.Render.consume(App.game, App);
+      }
       DBR.Input.endFrame();
     }
     if (App.draw) App.draw(); else DBR.Render.draw(App.game);

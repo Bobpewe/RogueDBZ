@@ -1,10 +1,10 @@
 # PROGRESS
 
 ## État actuel
-M6 terminé et testé (16 tests OK). Jalon en cours : **M7**.
+M7 terminé et testé (18 tests OK + parcours réel Chromium à 60 fps). Jalon en cours : **M8**.
 
 ## Prochaine action
-M7 : meta.js (sauvegarde, orbes, bonus, déblocages), audio.js (WebAudio), menus dans ui.js, machine à états dans main.js.
+M8 : équilibrage avec l'IA (durée 20–30 min), tests run complet victoire/défaite, README, polish.
 
 ## Décisions prises
 - Pas de modules ES : chaque fichier est une IIFE qui remplit l'espace de noms global `DBR` (window ou globalThis sous Node).

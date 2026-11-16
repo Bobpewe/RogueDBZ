@@ -43,6 +43,12 @@
       specialT: 0, ultra: 0, ultraT: 0, ultraDur: 10, ultraDmg: c.ultraDmg || 1.5,
       zeni: 0, upgrades: [], flash: 0, prev: {}
     };
+    // Bonus permanents achetés au Dojo (voir meta.js)
+    if (perks.hp) { p.maxHp += 10 * perks.hp; p.hp = p.maxHp; }
+    if (perks.dmg) p.dmg *= 1 + 0.05 * perks.dmg;
+    if (perks.ki) { p.kiMax += 10 * perks.ki; p.ki = p.kiMax; p.kiRegen *= 1 + 0.05 * perks.ki; }
+    if (perks.zeni) p.zeni = 25 * perks.zeni;
+    if (perks.ultra) p.ultra = Math.min(100, 20 * perks.ultra);
     return p;
   };
 

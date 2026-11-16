@@ -76,6 +76,7 @@
     var key = g.seed + ':' + (g.roomIndex || 0) + ':' + (g.room ? g.room.biome : -1);
     if (key !== floorKey) { floorCache = buildFloor(g); floorKey = key; }
     ctx.save();
+    if (R.shakeOff) R.shake = 0;
     if (R.shake > 0.2) {
       ctx.translate(Math.round((Math.random() - 0.5) * R.shake), Math.round((Math.random() - 0.5) * R.shake));
       R.shake *= 0.86;
@@ -86,6 +87,7 @@
     if (R.drawOver) R.drawOver(g, pal(g));     // effets au-dessus (particules, textes)
     ctx.restore();
     if (R.drawHud) R.drawHud(g);
+    if (R.noReticle) return;
     // Réticule de visée
     var m = DBR.Input.mouse;
     ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2;

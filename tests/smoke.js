@@ -308,6 +308,38 @@ test('boss : chaque combat traverse toutes ses phases jusqu\'à la mort du boss'
   return out.join(', ');
 });
 
+/* ---------- Méta-progression et sauvegarde (M7) ---------- */
+function fakeStorage() { var m = {}; return { getItem: function (k) { return k in m ? m[k] : null; }, setItem: function (k, v) { m[k] = String(v); }, raw: m }; }
+
+test('sauvegarde : écriture, relecture, robustesse aux données corrompues', function () {
+  var st = fakeStorage(), M = DBR.Meta, d = M.load(st);
+  assert(d.orbs === 0 && d.unlocked.goku && !d.unlocked.vegeta, 'valeurs par défaut');
+  d.orbs = 100; d.settings.sfx = 0.3;
+  assert(!M.unlockChar(d, 'goku') && M.unlockChar(d, 'vegeta') && d.orbs === 60, 'déblocage de Vegeta');
+  assert(M.buyPerk(d, 'hp') && d.perks.hp === 1 && d.orbs === 52, 'achat de bonus');
+  assert(M.save(st, d), 'écriture');
+  var e = M.load(st);
+  assert(JSON.stringify(e) === JSON.stringify(d), 'relecture différente de l\'écriture');
+  st.setItem(M.KEY, '{pas du json');
+  assert(M.load(st).orbs === 0, 'JSON corrompu : retour aux valeurs par défaut');
+  st.setItem(M.KEY, JSON.stringify({ orbs: -5, perks: { hp: 'x' }, unlocked: { piccolo: true }, pirate: 1 }));
+  var f = M.load(st);
+  assert(f.orbs === 0 && f.perks.hp === 0 && f.unlocked.piccolo === true && f.pirate === undefined, 'données invalides filtrées');
+  assert(M.load(null).orbs === 0 && M.save(null, d) === true, 'sans stockage disponible');
+  d.orbs = 0; assert(!M.buyPerk(d, 'dmg') && !M.unlockChar(d, 'piccolo'), 'achat sans orbes');
+  return 'clé ' + M.KEY;
+});
+
+test('méta : les bonus permanents s\'appliquent, la fin de run crédite des orbes', function () {
+  var base = DBR.makePlayer('goku', {}), p = DBR.makePlayer('goku', { hp: 2, dmg: 2, ki: 1, zeni: 2, ultra: 1 });
+  assert(p.maxHp === base.maxHp + 20 && p.dmg > base.dmg && p.kiMax === base.kiMax + 10 && p.zeni === 50 && p.ultra === 20, 'bonus non appliqués');
+  var d = DBR.Meta.defaults(), g = DBR.createGame({ seed: 8 });
+  g.stats.rooms = 7; g.stats.bosses = 2; g.roomIndex = 7; g.over = true;
+  var earned = DBR.Meta.finishRun(d, g);
+  assert(earned === 15 && d.orbs === 15 && d.stats.runs === 1 && d.stats.bestRoom === 7 && d.stats.wins === 0, 'récompense de run');
+  return '+' + earned + ' orbes pour 7 salles et 2 boss';
+});
+
 /* __TESTS_SUIVANTS__ */
 
 console.log('== ' + passed + ' réussi(s), ' + failed + ' échec(s) ==');

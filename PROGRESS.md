@@ -1,10 +1,10 @@
 # PROGRESS
 
 ## État actuel
-Étape 0 terminée (docs + git). Jalon en cours : **M1**.
+M1 terminé et testé (4 tests OK). Jalon en cours : **M2**.
 
 ## Prochaine action
-Écrire le moteur M1 : rng.js, game.js (joueur + salle), sprites/rendu/entrées, main.js, tests/smoke.js.
+M2 : combat.js (tirs, dash, Ki, spécial, ultime, dégâts), enemies.js (IA), fx.js (particules, shake, hit-stop).
 
 ## Décisions prises
 - Pas de modules ES : chaque fichier est une IIFE qui remplit l'espace de noms global `DBR` (window ou globalThis sous Node).

@@ -37,6 +37,44 @@
     }
   }
 
+  /** Objets des salles spéciales : haricot Senzu, coffre, étals de boutique. */
+  R.drawItems = function (g) {
+    var c = R.ctx, p = g.player;
+    for (var i = 0; i < g.props.length; i++) {
+      var o = g.props[i], x = Math.round(o.x), y = Math.round(o.y), fl = Math.round(Math.sin(R.t * 3 + i) * 3);
+      c.fillStyle = 'rgba(0,0,0,0.28)'; c.beginPath(); c.ellipse(x, y + 16, 20, 7, 0, 0, 6.3); c.fill();
+      if (o.kind === 'chest') {
+        c.fillStyle = '#5a3a14'; c.fillRect(x - 18, y - 12, 36, 26);
+        c.fillStyle = o.used ? '#3a2a14' : '#b87a2a'; c.fillRect(x - 16, y - 10, 32, o.used ? 6 : 22);
+        c.fillStyle = '#ffd23e'; c.fillRect(x - 16, y - 1, 32, 3); c.fillRect(x - 3, y - 4, 6, 9);
+        if (!o.used) R.label(c, 'Trésor', x, y - 22 + fl, '#ffd23e', 11, 'center');
+      } else if (o.kind === 'senzu' || o.kind === 'shopHeal') {
+        if (o.kind === 'shopHeal') { c.fillStyle = '#4a4a5a'; c.fillRect(x - 16, y + 4, 32, 12); c.fillStyle = '#6a6a7a'; c.fillRect(x - 16, y + 4, 32, 3); }
+        if (!o.used) {
+          c.fillStyle = '#1f6a1f'; c.fillRect(x - 9, y - 8 + fl, 18, 12); c.fillStyle = '#6fe06f'; c.fillRect(x - 8, y - 8 + fl, 16, 9); c.fillStyle = '#d0ffd0'; c.fillRect(x - 5, y - 6 + fl, 5, 3);
+          R.label(c, o.kind === 'senzu' ? 'Haricot Senzu (+50 % PV)' : 'Senzu +40 % PV — ' + o.cost + ' Z', x, y - 20, '#6fe06f', 11, 'center');
+        }
+      } else if (o.kind === 'shopItem') {
+        var u = DBR.UPGRADES[o.upg], rar = DBR.RARITY[u.rar];
+        c.fillStyle = '#4a4a5a'; c.fillRect(x - 18, y + 4, 36, 12); c.fillStyle = '#6a6a7a'; c.fillRect(x - 18, y + 4, 36, 3);
+        if (!o.used) {
+          c.fillStyle = '#000000'; c.fillRect(x - 13, y - 22 + fl, 26, 26);
+          c.fillStyle = rar.color; c.fillRect(x - 11, y - 20 + fl, 22, 22);
+          c.fillStyle = '#000000'; c.font = 'bold 16px monospace'; c.textAlign = 'center'; c.fillText(u.icon, x, y - 4 + fl);
+          R.label(c, o.cost + ' Z', x, y + 32, p.zeni >= o.cost ? '#ffd23e' : '#ff7070', 12, 'center');
+        }
+      }
+    }
+    var n = g.nearProp;                    // fiche de l'article le plus proche
+    if (n && !n.used && g.phase === 'open') {
+      var name = n.kind === 'shopHeal' ? 'Haricot Senzu' : DBR.UPGRADES[n.upg].name, desc = n.kind === 'shopHeal' ? 'Rend 40 % des PV.' : DBR.UPGRADES[n.upg].desc;
+      c.fillStyle = 'rgba(5,5,15,0.85)'; c.fillRect(W / 2 - 250, H - 110, 500, 60);
+      R.label(c, name + ' — ' + n.cost + ' Zeni', W / 2, H - 90, n.kind === 'shopHeal' ? '#6fe06f' : DBR.RARITY[DBR.UPGRADES[n.upg].rar].color, 13, 'center');
+      R.label(c, desc, W / 2, H - 74, '#ffffff', 11, 'center');
+      R.label(c, p.zeni >= n.cost ? '[E] Acheter' : 'Pas assez de Zeni', W / 2, H - 58, p.zeni >= n.cost ? '#ffe23e' : '#ff7070', 11, 'center');
+    }
+  };
+
   R.drawProps = function (g, P) {
     drawDoor(g, P);
     if (R.drawItems) R.drawItems(g, P);

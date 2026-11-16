@@ -23,13 +23,16 @@
       App.acc -= DBR.DT;
       if (App.update) App.update();                     // menus + jeu (défini par ui.js)
       else if (App.hitstop > 0) App.hitstop--;
+      else if (App.game.phase === 'reward') DBR.UI.updateReward(App.game);
       else {
         DBR.step(App.game, DBR.Input.gameInput(App.game));
+        if (App.game.phase === 'reward') DBR.UI.openReward();
         DBR.Render.consume(App.game, App);
       }
       DBR.Input.endFrame();
     }
-    if (App.draw) App.draw(); else DBR.Render.draw(App.game);
+    if (App.draw) App.draw();
+    else { DBR.Render.draw(App.game); if (App.game.phase === 'reward') DBR.UI.drawReward(App.game); }
     requestAnimationFrame(frame);
   }
 

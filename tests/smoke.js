@@ -204,6 +204,46 @@ test('run : l\'IA nettoie la première salle et franchit la porte', function () 
   return fmt(g);
 });
 
+/* ---------- Améliorations et objets (M4) ---------- */
+test('améliorations : chacune s\'applique sans erreur et reste jouable', function () {
+  var ids = DBR.UPGRADE_IDS, rar = [0, 0, 0];
+  assert(ids.length >= 20, 'il faut ~20 améliorations, trouvé ' + ids.length);
+  ids.forEach(function (id) { rar[DBR.UPGRADES[id].rar]++; });
+  assert(rar[0] && rar[1] && rar[2], 'les 3 raretés doivent exister');
+  var g = DBR.createGame({ seed: 21 });
+  g.player.hp = g.player.maxHp = 1e6;
+  ids.forEach(function (id) { DBR.applyUpgrade(g, id); DBR.applyUpgrade(g, id); });   // tout cumulé deux fois
+  var p = g.player;
+  ['dmg', 'speed', 'fireRate', 'kiMax', 'range', 'dashMax', 'specialCost'].forEach(function (k) { assert(isFinite(p[k]) && p[k] > 0, 'stat invalide : ' + k); });
+  for (var i = 0; i < 1200 && !g.over; i++) { if (g.phase === 'reward') botChoose(g); DBR.step(g, botInput(g)); g.events.length = 0; }
+  assert(g.stats.kills > 0, 'aucune élimination avec le build complet');
+  return ids.length + ' améliorations (' + rar[0] + ' communes, ' + rar[1] + ' rares, ' + rar[2] + ' légendaires), toutes combinées';
+});
+
+test('récompense : 3 choix distincts, le choix rouvre la porte', function () {
+  var g = DBR.createGame({ seed: 31 });
+  g.choice = DBR.rollChoices(g, 0); g.phase = 'reward';
+  assert(g.choice.length === 3 && new Set(g.choice).size === 3, 'choix invalides : ' + g.choice);
+  var f = g.frame; DBR.step(g, { mx: 1 }); assert(g.frame === f, 'la simulation doit attendre le choix');
+  var id = g.choice[1]; assert(DBR.chooseUpgrade(g, 1), 'choix refusé');
+  assert(g.phase === 'open' && g.player.upgrades[0] === id, 'amélioration non appliquée');
+  return DBR.UPGRADES[id].name;
+});
+
+test('salles spéciales : Senzu, coffre et boutique', function () {
+  var g = DBR.createGame({ seed: 41 }), p = g.player, room = { kind: 'heal', biome: 0 };
+  function setup(kind) { g.props = []; g.phase = 'open'; room.kind = kind; DBR.setupSpecial(g, room, g.rng); }
+  setup('heal'); p.hp = 10; p.x = g.props[0].x; p.y = g.props[0].y; DBR.stepProps(g, {}, DBR.DT);
+  assert(p.hp === 60 && g.props[0].used, 'le Senzu doit rendre 50 % des PV');
+  setup('treasure'); p.x = g.props[0].x; p.y = g.props[0].y; DBR.stepProps(g, {}, DBR.DT);
+  assert(g.phase === 'reward' && g.choice.length === 3, 'le coffre doit proposer un choix'); DBR.chooseUpgrade(g, 0);
+  setup('shop'); var it = g.props[0]; p.x = it.x; p.y = it.y; p.zeni = 0; p.prev = {};
+  DBR.stepProps(g, { interact: true }, DBR.DT); assert(!it.used, 'achat sans Zeni');
+  p.zeni = it.cost + 5; var n = p.upgrades.length; DBR.stepProps(g, { interact: true }, DBR.DT);
+  assert(it.used && p.zeni === 5 && p.upgrades.length === n + 1, 'achat non effectué');
+  return 'OK';
+});
+
 /* __TESTS_SUIVANTS__ */
 
 console.log('== ' + passed + ' réussi(s), ' + failed + ' échec(s) ==');

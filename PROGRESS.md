@@ -1,10 +1,10 @@
 # PROGRESS
 
 ## État actuel
-M3 terminé et testé (8 tests OK). Jalon en cours : **M4**.
+M4 terminé et testé (11 tests OK). Jalon en cours : **M5**.
 
 ## Prochaine action
-M4 : upgrades.js (~26 améliorations, raretés, tirage 1 parmi 3, salles soin/trésor), ui.js (cartes de choix).
+M5 : 4 biomes (palettes + ennemis recolorés), 3 personnages (sprites Vegeta, Piccolo), vérifier la boutique en jeu.
 
 ## Décisions prises
 - Pas de modules ES : chaque fichier est une IIFE qui remplit l'espace de noms global `DBR` (window ou globalThis sous Node).
